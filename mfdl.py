@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- Mode: python; coding: utf-8; tab-width: 8; indent-tabs-mode: t; -*-
+# -*- Mode: python; coding: utf-8; tab-width: 4; indent-tabs-mode: nil; -*-
 
 '''
 Mangafox Download Script by Kunal Sarkhel <theninja@bluedevs.net>
@@ -76,19 +76,26 @@ def get_chapter_number(url_fragment):
     """Parse the url fragment and return the chapter number."""
     return ''.join(url_fragment.rsplit("/")[-2:])
 
+def check_jpg(jpeg_file):
+    data = open(jpeg_file,'rb').read(11)
+    return data[:4] == '\xff\xd8\xff\xe0' and data[6:] == 'JFIF\0'
 
 def download_urls(image_urls, manga_name, chapter_number):
     """Download all images from a list"""
     num = 1
     os.makedirs("{0}/{1}/".format(manga_name, chapter_number))
     for url in image_urls:
-        filename = "./{0}/{1}/{2:03}.jpg".format(manga_name,
-                                                 chapter_number,
-                                                 num)
-        print "Downloading {0} to {1}".format(url, filename)
-        urllib.urlretrieve(url, filename)
-        num = num + 1
-
+        while True:
+            filename = "./{0}/{1}/{2:03}.jpg".format(manga_name,
+                chapter_number, num)
+            print "Downloading {0} to {1}".format(url, filename)
+            urllib.urlretrieve(url, filename)
+        
+            if check_jpg(filename):
+                num = num + 1
+                break
+            else:
+                print 'Re',
 
 def makecbz(dirname):
     """Create CBZ files for all files in a directory."""
@@ -100,7 +107,6 @@ def makecbz(dirname):
         print("writing {0} to {1}".format(filename, zipname))
         myzip.write(filename)
     myzip.close()
-
 
 def download_manga_range(manga_name, range_start, range_end):
     """Download a range of a chapters"""
