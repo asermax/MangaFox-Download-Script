@@ -45,3 +45,7 @@ Download Yureka chapters 160-170:
 Notes
 -----
 Please do not overuse and abuse this and destroy Mangafox. If you've got some cash, why not donate some to them and help them keep alive and combat server costs? I really would not like people to destroy Mangafox because of greedy downloading. Use this wisely and don't be evil.
+
+Credits
+-------
+This is a fork on [techwizrd](https://github.com/techwizrd/MangaFox-Download-Script) script, with some changes to adapt to mangafox's new template.
