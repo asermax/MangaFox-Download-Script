@@ -18,8 +18,6 @@ import shutil
 from zipfile import ZipFile
 from BeautifulSoup import BeautifulSoup
 
-URL_BASE = "http://mangafox.com/"
-
 
 def get_page_soup(url):
     """Download a page and return a BeautifulSoup object of the html"""
@@ -38,7 +36,8 @@ def get_volume_chapter_number(url):
 def get_chapter_urls(manga_name):
     """Get the chapter list for a manga"""
     print "Getting chapter urls"
-    url = "{0}manga/{1}?no_warning=1".format(URL_BASE, manga_name.lower())
+    url = "http://mangafox.me//manga/{0}?no_warning=1".format(
+        manga_name.lower())
     print "Url: " + url
     
     soup = get_page_soup(url)
@@ -86,7 +85,7 @@ def find_volume_chapter(chapters, number):
     return chapter
     
 def strip_volume_chapter(fully_qualified):
-    match = re.search('v(\d+)c(\d+)', fully_qualified).groups()
+    match = re.search('v(\d+)c(\d+)', fully_qualified)
     chapter = (None, None)
     
     if match:
@@ -94,7 +93,7 @@ def strip_volume_chapter(fully_qualified):
     else:
         print "Chapter not found"
     
-    return 
+    return chapter
 
 def is_number(string):
     try:
@@ -134,7 +133,8 @@ def get_chapter_image_urls(chapter_url):
     pages = get_page_numbers(chapter)
     
     for page in pages:
-        print "page: {0}".format(page),
+        sys.stdout.write('\rProgress: page %s of %d' % (page, len(pages)))
+        sys.stdout.flush()
         page_soup = get_page_soup(chapter_url + page + ".html")
         images = page_soup.findAll('img', {'id': 'image'})
         yield int(page), images[0]['src']
@@ -147,22 +147,20 @@ def download_image(page, image_url, download_dir):
     """Download all images from a list"""    
     while True:
         filename = '{0}/{1:03}.jpg'.format(download_dir, page)
-        print 'Downloading {0} to {1}'.format(image_url, filename)
         urllib.urlretrieve(image_url, filename)
     
         if check_jpg(filename):
             break
-        else:
-            print 'Re',
 
 def makecbz(dirname):
     """Create CBZ files for all files in a directory."""
+    sys.stdout.write('\rProgress: creating cbz...')
+    sys.stdout.flush()
     dirname = os.path.abspath(dirname)
     zipname = dirname + '.cbz'
     images = glob.glob(dirname + "/*.jpg")
     myzip = ZipFile(zipname, 'w')
-    for filename in images:
-        print("writing {0} to {1}".format(filename, zipname))
+    for filename in images:        
         myzip.write(filename)
     myzip.close()
 
@@ -179,6 +177,9 @@ def download_chapter(manga_name, volume, chapter, url):
         
     makecbz(download_dir)
     shutil.rmtree(download_dir)
+    
+    sys.stdout.write('\rProgress: Finished!\n')
+    sys.stdout.flush()
 
 def download_manga_range(manga_name, range_start, range_end):
     """Download a range of a chapters"""
