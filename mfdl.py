@@ -130,39 +130,30 @@ def get_page_numbers(soup):
 
 def get_chapter_image_urls(chapter_url):
     """Find all image urls of a chapter and return them"""
-    print "Getting chapter urls"
     chapter = get_page_soup(chapter_url)
     pages = get_page_numbers(chapter)
-    image_urls = []
-    print "Getting image urls..."
+    
     for page in pages:
-        print "page: {0}".format(page)
-        print "Getting image url from {0}{1}.html".format(chapter_url, page)
+        print "page: {0}".format(page),
         page_soup = get_page_soup(chapter_url + page + ".html")
         images = page_soup.findAll('img', {'id': 'image'})
-        image_urls.append(images[0]['src'])
-    return image_urls
+        yield int(page), images[0]['src']
 
 def check_jpg(jpeg_file):
     data = open(jpeg_file,'rb').read(11)
     return data[:4] == '\xff\xd8\xff\xe0' and data[6:] == 'JFIF\0'
 
-def download_urls(image_urls, manga_name, chapter_number):
-    """Download all images from a list"""
-    num = 1
-    os.makedirs("{0}/{1}/".format(manga_name, chapter_number))
-    for url in image_urls:
-        while True:
-            filename = "./{0}/{1}/{2:03}.jpg".format(manga_name,
-                chapter_number, num)
-            print "Downloading {0} to {1}".format(url, filename)
-            urllib.urlretrieve(url, filename)
-        
-            if check_jpg(filename):
-                num = num + 1
-                break
-            else:
-                print 'Re',
+def download_image(page, image_url, download_dir):
+    """Download all images from a list"""    
+    while True:
+        filename = '{0}/{1:03}.jpg'.format(download_dir, page)
+        print 'Downloading {0} to {1}'.format(image_url, filename)
+        urllib.urlretrieve(image_url, filename)
+    
+        if check_jpg(filename):
+            break
+        else:
+            print 'Re',
 
 def makecbz(dirname):
     """Create CBZ files for all files in a directory."""
@@ -180,9 +171,12 @@ def download_chapter(manga_name, volume, chapter, url):
     print("===============================================")
     print "Chapter " + name
     print("===============================================")
-    image_urls = get_chapter_image_urls(url)
-    download_urls(image_urls, manga_name, name)
     download_dir = "./{0}/{1}".format(manga_name, name)
+    os.makedirs(download_dir)
+    
+    for page, image_url in get_chapter_image_urls(url):
+        download_image(page, image_url, download_dir)    
+        
     makecbz(download_dir)
     shutil.rmtree(download_dir)
 
@@ -232,7 +226,7 @@ def download_manga(manga_name, chapter_number=None):
         volume, chapter = clean_input_chapter(volumes, chapter_number)
                    
         if volume:
-            url = chapters[volume][chapter]
+            url = volumes[volume][chapter]
             download_chapter(manga_name, volume, chapter, url)
     else:
         for volume, chapters in sorted(volumes.iteritems(),
@@ -259,3 +253,5 @@ if __name__ == '__main__':
         print("USAGE: mfdl.py [MANGA_NAME]")
         print("       mfdl.py [MANGA_NAME] [CHAPTER_NUMBER]")
         print("       mfdl.py [MANGA_NAME] [RANGE_START] [RANGE_END]")
+        print("       mfdl.py [MANGA_NAME] volume [RANGE_START]")
+        print("       mfdl.py [MANGA_NAME] volume [RANGE_START] [RANGE_END]")
