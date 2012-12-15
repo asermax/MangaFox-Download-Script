@@ -178,7 +178,7 @@ def download_chapter(manga_name, volume, chapter, url):
     makecbz(download_dir)
     shutil.rmtree(download_dir)
     
-    sys.stdout.write('\rProgress: Finished!\n')
+    sys.stdout.write('\rProgress: Finished!        \n')
     sys.stdout.flush()
 
 def download_manga_range(manga_name, range_start, range_end):
