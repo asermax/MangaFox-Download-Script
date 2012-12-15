@@ -37,7 +37,7 @@ def get_chapter_urls(manga_name):
     """Get the chapter list for a manga"""
     print "Getting chapter urls"
     url = "http://mangafox.me//manga/{0}?no_warning=1".format(
-        manga_name.lower())
+        manga_name.lower().replace(' ', '_'))
     print "Url: " + url
     
     soup = get_page_soup(url)
@@ -238,9 +238,7 @@ def download_manga(manga_name, chapter_number=None):
             
     os.remove("page.html")
 
-if __name__ == '__main__':
-    sys.argv[1] = sys.argv[1].replace(' ', '_')
-    
+if __name__ == '__main__':    
     if len(sys.argv) == 5:
         download_manga_volume(sys.argv[1], sys.argv[3], sys.argv[4])
     elif len(sys.argv) == 4:
