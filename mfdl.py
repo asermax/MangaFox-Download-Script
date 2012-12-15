@@ -239,6 +239,8 @@ def download_manga(manga_name, chapter_number=None):
     os.remove("page.html")
 
 if __name__ == '__main__':
+    sys.argv[1] = sys.argv[1].replace(' ', '_')
+    
     if len(sys.argv) == 5:
         download_manga_volume(sys.argv[1], sys.argv[3], sys.argv[4])
     elif len(sys.argv) == 4:
